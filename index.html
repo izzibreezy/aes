@@ -21,11 +21,9 @@
             0% {
                 background-position: 0% 50%;
             }
-
             50% {
                 background-position: 100% 50%;
             }
-
             100% {
                 background-position: 0% 50%;
             }
@@ -124,12 +122,12 @@
             <input type="submit" id="encryptBtn" value="Encrypt">
         </form>
 
-        <h3>Encrypted Text:</h3>
-        <textarea id="encryptedOutput" rows="4" readonly ></textarea>
+        <h3 style="display:none;" id="encryptedTextHeader">Encrypted Text:</h3>
+        <textarea id="encryptedOutput" rows="4" readonly style="display:none;"></textarea>
         <input type="submit" id="decryptBtn" value="Decrypt" style="display:none;">
 
-        <h3>Decrypted Text:</h3>
-        <textarea id="decryptedOutput" rows="4" readonly></textarea>
+        <h3 style="display:none;" id="decryptedTextHeader">Decrypted Text:</h3>
+        <textarea id="decryptedOutput" rows="4" readonly style="display:none;"></textarea>
     </div>
 
     <script>
@@ -143,20 +141,17 @@
             const iv = crypto.getRandomValues(new Uint8Array(16));
             const encoded = new TextEncoder().encode(plaintext);
     
-            // Encrypt the data
             const encrypted = await crypto.subtle.encrypt(
                 { name: 'AES-CBC', iv },
                 key,
                 encoded
             );
     
-            // Combine IV and encrypted data
             const encryptedArray = new Uint8Array(encrypted);
             const combined = new Uint8Array(iv.length + encryptedArray.length);
             combined.set(iv);
             combined.set(encryptedArray, iv.length);
     
-            // Convert to Base64
             return btoa(String.fromCharCode(...combined));
         }
     
@@ -174,12 +169,18 @@
             const inputText = document.getElementById('inputText').value;
             const encryptionKey = document.getElementById('encryptionKey').value;
     
+            // Clear previous encrypted output
+            document.getElementById('encryptedOutput').value = '';
+    
             const key = await getKey(encryptionKey);
             const encrypted = await encrypt(inputText, key);
     
             document.getElementById('encryptedOutput').value = encrypted;
+            document.getElementById('encryptedOutput').style.display = 'block'; // Show encrypted output
             document.getElementById('decryptBtn').style.display = 'inline-block';
-            document.getElementById('decryptBtn').style.display = 'inline-block';
+            document.getElementById('decryptedTextHeader').style.display = 'none';
+            document.getElementById('encryptedTextHeader').style.display = 'inline-block';
+            document.getElementById('decryptedOutput').style.display = 'none'; // Hide decrypted output initially
         });
     
         document.getElementById('decryptBtn').addEventListener('click', async function () {
@@ -189,8 +190,11 @@
             const decryptedText = await decrypt(encryptedData, key);
     
             document.getElementById('decryptedOutput').value = decryptedText;
+            document.getElementById('decryptedOutput').style.display = 'block'; // Show decrypted output
+            document.getElementById('decryptedTextHeader').style.display = 'inline-block';
         });
-    </script>       
+    </script>
+    
 </body>
 
 </html>
